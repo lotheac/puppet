@@ -187,13 +187,14 @@ Puppet::Type.type(:package).provide :pkg, :parent => Puppet::Provider::Package d
     should = @resource[:ensure]
     # always unhold if explicitly told to install/update
     self.unhold
-    command = 'update'
+    is = self.query
+    if is[:ensure].to_sym == :absent
+      command = 'install'
+    else
+      command = 'update'
+    end
     unless should.is_a? Symbol
       name += "@#{should}"
-      is = self.query
-      if is[:ensure].to_sym == :absent
-        command = 'install'
-      end
     end
     r = exec_cmd(command(:pkg), command, '--accept', name)
     return r if nofail
